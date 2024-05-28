@@ -5,8 +5,10 @@ import requests
 def get_coordinates(city):
     """Gets the coordinate bounds of a city from OpenStreetMap."""
 
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                             "Chrome/58.0.3029.110 Safari/537.3"}
     url = "https://nominatim.openstreetmap.org/search?q=" + city + "&format=json"
-    response = requests.get(url=url, timeout=10)
+    response = requests.get(url=url, timeout=10, headers=headers)
     response.raise_for_status()
     data = response.json()
     for response in data:
@@ -26,7 +28,10 @@ def get_property_list(
     url = "https://api2.realtor.ca/Listing.svc/PropertySearch_Post"
     headers = {"Referer": "https://www.realtor.ca/",
                "Origin": "https://www.realtor.ca/",
-               "Host": "api2.realtor.ca"}
+               "Host": "api2.realtor.ca",
+               "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                             "Chrome/58.0.3029.110 Safari/537.3"
+               }
     form = {
         "LatitudeMin": lat_min,
         "LatitudeMax": lat_max,
@@ -56,7 +61,10 @@ def get_property_details(property_id, mls_reference_number):
 
     headers = {"Referer": "https://www.realtor.ca/",
                "Origin": "https://www.realtor.ca/",
-               "Host": "api2.realtor.ca"}
+               "Host": "api2.realtor.ca",
+               "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                             "Chrome/58.0.3029.110 Safari/537.3"
+               }
     response = requests.get(url=url, headers=headers, timeout=10)
     if response.status_code == 403:
         print("Error 403: Rate limited")
