@@ -3,6 +3,8 @@ from time import sleep
 from math import ceil
 import os
 from random import randint
+
+from IPython.core.display_functions import display
 from requests import HTTPError
 import pandas as pd
 from queries import get_coordinates, get_property_list, get_property_details
@@ -27,10 +29,12 @@ def get_property_list_by_city(city):
                 coords[0], coords[1], 
                 coords[2], coords[3],
                 current_page=current_page)
-            ## Rounds up the total records by the records per page to nearest int
+            # Initialize an empty list to store DataFrames
+            list_of_dfs = []
             max_pages = ceil(data["Paging"]["TotalRecords"]/data["Paging"]["RecordsPerPage"])
             for json in data["Results"]:
-                results_df = results_df.append(pd.json_normalize(json))
+                df = pd.json_normalize(json)
+                list_of_dfs.append(df)
             results_df.to_csv(filename, index=False)
             current_page += 1
             sleep(randint(600, 900))  # sleep 10-15 minutes to avoid rate-limit
