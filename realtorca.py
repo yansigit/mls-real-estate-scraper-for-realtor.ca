@@ -4,43 +4,52 @@ from math import ceil
 import os
 from random import randint
 
-from IPython.core.display_functions import display
 from requests import HTTPError
 import pandas as pd
 from queries import get_coordinates, get_property_list, get_property_details
+from datetime import datetime
 
-def get_property_list_by_city(city):
+def get_property_list_by_city(cities):
     """ Gets a list of properties for a given city, and returns it as a CSV file. """
+    # Check if 'data' directory exists, and create it if not
+    if not os.path.exists('data'):
+        os.makedirs('data')
 
-    coords = get_coordinates(city)  # Creates bounding box for city
-    max_pages = 1
-    current_page = 1
-    filename = city.replace(" ", "").replace(",", "") + ".csv"
-    if os.path.exists(filename):
-        results_df = pd.read_csv(filename)
-        ## If the queries were interrupted, this will resume from the last page
-        current_page = ceil(results_df.shape[0]/200) + 1
-        max_pages = current_page + 1
-    else:
-        results_df = pd.DataFrame()
-    while current_page <= max_pages:
-        try:
-            data = get_property_list(
-                coords[0], coords[1], 
-                coords[2], coords[3],
-                current_page=current_page)
-            # Initialize an empty list to store DataFrames
-            list_of_dfs = []
-            max_pages = ceil(data["Paging"]["TotalRecords"]/data["Paging"]["RecordsPerPage"])
-            for json in data["Results"]:
-                df = pd.json_normalize(json)
-                list_of_dfs.append(df)
-            results_df.to_csv(filename, index=False)
-            current_page += 1
-            sleep(randint(600, 900))  # sleep 10-15 minutes to avoid rate-limit
-        except HTTPError:
-            print("Error occurred on city: " + city)
-            sleep(randint(3000, 3600))  # sleep for 50-60 minutes if limited
+    # Check if 'MLS' directory exists within 'data', and create it if not
+    if not os.path.exists('data/MLS'):
+        os.makedirs('data/MLS')
+
+    for city in cities:
+        coords = get_coordinates(city)  # Creates bounding box for city
+        max_pages = 1
+        current_page = 1
+        todayDate = datetime.now().strftime("YYYY-MM-DD")
+        filename = "data/MLS/" + city.replace(" ", "").replace(",", "") + f"{todayDate}.csv"
+        if os.path.exists(filename):
+            results_df = pd.read_csv(filename)
+            ## If the queries were interrupted, this will resume from the last page
+            current_page = ceil(results_df.shape[0]/200) + 1
+            max_pages = current_page + 1
+        else:
+            results_df = pd.DataFrame()
+        while current_page <= max_pages:
+            try:
+                data = get_property_list(
+                    coords[0], coords[1],
+                    coords[2], coords[3],
+                    current_page=current_page)
+                # Initialize an empty list to store DataFrames
+                list_of_dfs = []
+                max_pages = ceil(data["Paging"]["TotalRecords"]/data["Paging"]["RecordsPerPage"])
+                for json in data["Results"]:
+                    df = pd.json_normalize(json)
+                    list_of_dfs.append(df)
+                results_df.to_csv(filename, index=False)
+                current_page += 1
+                sleep(randint(600, 900))  # sleep 10-15 minutes to avoid rate-limit
+            except HTTPError:
+                print("Error occurred on city: " + city)
+                sleep(randint(3000, 3600))  # sleep for 50-60 minutes if limited
 
 
 def get_property_details_from_csv(filename):
