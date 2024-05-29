@@ -44,6 +44,8 @@ def get_property_list_by_city(cities):
                 for json in data["Results"]:
                     df = pd.json_normalize(json)
                     list_of_dfs.append(df)
+                # Concatenate DataFrames
+                results_df = pd.concat(list_of_dfs, ignore_index=True)
                 results_df.to_csv(filename, index=False)
                 current_page += 1
                 sleep(randint(600, 900))  # sleep 10-15 minutes to avoid rate-limit
