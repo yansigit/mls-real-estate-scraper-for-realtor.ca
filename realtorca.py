@@ -23,8 +23,8 @@ def get_property_list_by_city(cities):
         coords = get_coordinates(city)  # Creates bounding box for city
         max_pages = 1
         current_page = 1
-        todayDate = datetime.now().strftime("YYYY-MM-DD")
-        filename = "data/MLS/" + city.replace(" ", "").replace(",", "") + f"{todayDate}.csv"
+        today_date = datetime.now().strftime("%Y-%m-%d")
+        filename = "data/MLS/" + city.replace(" ", "").replace(",", "") + f"{today_date}.csv"
         if os.path.exists(filename):
             results_df = pd.read_csv(filename)
             ## If the queries were interrupted, this will resume from the last page
